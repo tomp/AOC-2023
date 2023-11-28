@@ -66,6 +66,6 @@ probably want to modify `dayN.py` to suit your own coding style.
 
 
 ----
-Tom Pollard
-November 28, 2023
+Tom Pollard :: November 28, 2023
+
 
