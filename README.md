@@ -23,6 +23,7 @@ for that day, in a file named `input.txt`.
 
 It's safe to run `./new_day.sh 5` again - the `day5.py` script is only
 written if it doesn't exist yet.  The other files will be rewritten, but they 
+are just static files, downloaded from the adventofcode.com website.
 
 #### session_key.txt
 For each day's puzzle, the problem is the same, but the input data you work
