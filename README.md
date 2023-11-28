@@ -48,13 +48,13 @@ challenge by first testing my code against the examples, given in the puzzle
 description, and then running it against the input data.  The function
 skeletons in `dayN.py` reflect this:
 
-solve() ........ code to solve the problem presented in part 1
-example1() ..... code to test solve() against the part-1 examples
-part1() ........ code to run solve() against the real part-1 input data
+    solve() ........ code to solve the problem presented in part 1
+    example1() ..... code to test solve() against the part-1 examples
+    part1() ........ code to run solve() against the real part-1 input data
 
-solve2() ....... code to solve the problem presented in part 2
-example2() ..... code to test solve2() against the part-2 examples
-part2() ........ code to run solve2() against the real part-2 input data
+    solve2() ....... code to solve the problem presented in part 2
+    example2() ..... code to test solve2() against the part-2 examples
+    part2() ........ code to run solve2() against the real part-2 input data
 
 The example* and part* functions check the answers against the expected answers.
 The other functions are helper code to unpack a couple of the typical types of
