@@ -24,8 +24,6 @@ SAMPLE_CASES = [
     ),
 ]
 
-SAMPLE_CASES2 = SAMPLE_CASES
-
 SAMPLE_CASES2 = [
     (
         """
