@@ -231,7 +231,7 @@ class Grid:
         return rmax - rmin + 1, cmax - cmin + 1
 
     def at(self, pos: Pos) -> str:
-        return self.grid.get(pos, GROUND)
+        return self.grid[pos]
 
     def neighbors(self, pos) -> list[Pos]:
         if self.at(pos) == NS:
@@ -265,7 +265,7 @@ class Grid:
 
 
 def parse_input(lines):
-    grid = defaultdict(str)
+    grid = defaultdict(lambda: GROUND)
     for row, line in enumerate(lines):
         assert line
         for col, ch in enumerate(line):
