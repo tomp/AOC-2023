@@ -278,7 +278,7 @@ def solve2(lines: Lines) -> int:
     """Solve the problem."""
     grid = parse_input(lines)
     print(grid)
-    loop = grid.find_loop()
+    loop = set(grid.find_loop())
     outside = set()
     inside = set()
 
