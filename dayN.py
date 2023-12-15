@@ -29,7 +29,9 @@ Sections = Sequence[Lines]
 # Utility functions
 
 def load_input(infile: str, strip=True, blank_lines=False) -> Lines:
-    return load_text(Path(infile).read_text())
+    return load_text(
+        Path(infile).read_text(), strip=strip, blank_lines=blank_lines
+    )
 
 def load_text(text: str, strip=True, blank_lines=False) -> Lines:
     if strip:
