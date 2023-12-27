@@ -37,7 +37,7 @@ def load_text(text: str, strip=True, blank_lines=False) -> Lines:
     if strip:
         lines = [line.strip() for line in text.strip("\n").split("\n")]
     else:
-        lines = [line for line in text.strip("\n").split("\n")]
+        lines = text.strip("\n").split("\n")
     if blank_lines:
         return lines
     return [line for line in lines if line.strip()]
