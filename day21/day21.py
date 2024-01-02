@@ -44,24 +44,6 @@ SAMPLE_CASES2 = [
 .##.#.####.
 .##..##.##.
 ...........
-        """, 500, 167004
-    ),
-]
-
-SAMPLE_CASES3 = [
-    (
-        """
-...........
-.....###.#.
-.###.##..#.
-..#.#...#..
-....#.#....
-.##..S####.
-.##..#...#.
-.......##..
-.##.#.####.
-.##..##.##.
-...........
         """, 6, 16
     ),
     (
@@ -315,48 +297,129 @@ class Board2:
         q = deque([])
         q.append((0, self.start))
 
-        locs = set()
         visited = set()
         visited.add((0, self.start))
         nplots = [0] * (max_steps + 1) # number of plots reached after 'steps' steps
         last_steps = -1
         while q:
             steps, pos = q.popleft()
-            # print(f">>> {steps}:  {pos}")
             if steps > max_steps:
                 break
-            if steps == max_steps:
-                locs.add(pos)
             nplots[steps] += 1
-            if steps and steps > last_steps:
-                print(f"{last_steps},{nplots[last_steps]}")
             for naypos in pos.neighbors():
                 if self.at(naypos) == GARDEN and (steps+1, naypos) not in visited:
                     visited.add((steps+1, naypos))
                     q.append((steps+1, naypos))
             last_steps = steps
 
-        return len(locs)
+        return nplots
+
+
+def find_period(vals: list[int, int]) -> int:
+    """Look for the periodicity in the diffs of the given values, such that every nth
+    diff changes linearly.  For a simple quadratic function, the period would be 1.
+    The values here increase quadratically, overall, but there's a fine-leveled
+    structure to the function, based on the features of the individual maps.
+    Returns 0 if no period was found.
+    """
+    dval = [v1 - v0 for v0, v1 in zip(vals[:-1], vals[1:])]
+    print(f"## find_period: {len(vals)} vals   {len(dval)} dvals")
+
+    for period in range(3, len(vals)//2):
+        ncycle = len(vals) // period
+        start, end = max(0, ncycle-4), ncycle-1
+        # print(f"period {period:3d}  ncycle: {ncycle}  start: {start}  end: {end}")
+        ddval = [dval[(cycle+1)*period] - dval[cycle*period] for cycle in range(start, end)]
+        ddval_str = " ".join([f"{v:4d}" for v in ddval])
+        # print(f"period {period:3d} -> {ddval_str}")
+        if all([ddval[i] == ddval[0] for i in range(1, len(ddval))]):
+            return period
+
+    return 0
+
+
+def extrapolate(vals: list[int, int], period: int, at: int) -> int:
+    tcycle = at // period
+    tcol = at % period
+    # print(f"at: {at} -> cycle {tcycle}, col {tcol}\n")
+
+    dval = []
+    ncycle = len(vals) // period
+    for cycle in range(ncycle):
+        row = []
+        for col in range(period):
+            i = period *(cycle) + col
+            row.append(vals[i+1] - vals[i])
+        dval.append(row)
+
+    # for cycle in range(min(10, ncycle)):
+    #     print(" ".join([f"{vals[col]:4d}" for col in range(cycle*period, (cycle+1)*period)]))
+    # print()
+
+    # for cycle in range(min(10, ncycle)):
+    #     print(" ".join([f"{dval[cycle][col]:4d}" for col in range(period)]))
+    # print()
+
+    start = ncycle - 1
+    assert start > 1
+    ddval = [dval[start][col] - dval[start-1][col] for col in range(period)]
+    ddval1 = [dval[start-1][col] - dval[start-2][col] for col in range(period)]
+    while all([ddval[col] == ddval1[col] for col in range(period)]) and start > 1:
+        start -= 1
+        ddval = ddval1
+        ddval1 = [dval[start-1][col] - dval[start-2][col] for col in range(period)]
+
+    # print(" ".join([f"{ddval[col]:4d}" for col in range(period)]))
+    # print(f"start: {start}")
+
+    if tcycle < start:
+        return vals[at]
+
+    base = vals[start * period]
+    result = base
+    # print(f"base: start*period = {start}*{period} = {base}")
+
+    result += (tcycle - start) * sum(dval[start])
+    # print(f"tcycle - start = {tcycle} - {start} = {tcycle - start}")
+
+    # dval_start = " ".join([f"{dval[start][col]:4d}" for col in range(period)])
+    # print(f"sum(dval[start]) = sum([{dval_start}]) = {sum(dval[start])}")
+    # print(f"(tcycle - start) * sum(dval[start]) = {tcycle -start} * {sum(dval[start])} = {(tcycle - start) * sum(dval[start])}\n")
+
+    result += (tcycle - start)*(tcycle - start - 1)*sum(ddval)//2
+    # ddval_start = " ".join([f"{ddval[col]:4d}" for col in range(period)])
+    # print(f"sum(ddval) = sum([{ddval_start}]) = {(tcycle - start)*(tcycle - start - 1)*sum(ddval)//2}\n")
+
+    result += sum(dval[start][:tcol]) + (tcycle - start) * sum(ddval[:tcol])
+    # ddval_tcol = " ".join([f"{ddval[col]:4d}" for col in range(tcol)])
+    # print(f"(tcycle - start) * sum(ddval[:tcol] = {tcycle -start} * sum({ddval_tcol}) = {(tcycle - start) * sum(ddval[:tcol])}\n")
+
+    return result
 
 
 
-def solve2(lines: Lines, max_steps=64) -> int:
+
+def solve2(lines: Lines, steps=1) -> int:
     """Solve the problem."""
     board = Board2.from_lines(lines)
     print(board)
     print()
 
-    # visited = board.explore(max_steps)
-    visited = board.explore(750)
-    return visited
+    assert board.nrow == board.ncol
+    if board.nrow > 50:
+        max_steps = min(550, int(3.1 * board.ncol))
+    else:
+        max_steps = min(550, 10*board.ncol)
+    plots = board.explore(max_steps)
+    return extrapolate(plots, board.ncol, steps)
 
-def solve(lines: Lines, max_steps=64) -> int:
+def solve(lines: Lines, steps=64) -> int:
     """Solve the problem."""
     board = Board.from_lines(lines)
     print(board)
     print()
 
-    visited = board.explore(max_steps)
+    visited = board.explore(steps)
     return visited
 
 
@@ -396,7 +459,7 @@ def part2(lines: Lines) -> None:
     print("PART 2:")
     result = solve2(lines, 26501365)
     print(f"result is {result}")
-    assert result == -1
+    assert result == 605247138198755
     print("= " * 32)
 
 
